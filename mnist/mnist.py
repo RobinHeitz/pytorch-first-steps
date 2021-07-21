@@ -5,24 +5,8 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from  torch.autograd import Variable
 
+NET_NAME = "net_mnist.pt"
 
-kwargs = {}
-#if CUDA is in use
-# kwargs = {'num_workers':1, 'pin_memory':True}
-
-train_data = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=True, download=True,
-        transform=transforms.Compose([transforms.ToTensor(),
-        transforms.Normalize((0.1307,),(0.3081,))])),
-    batch_size=64,shuffle=True, **kwargs)
-
-
-test_data = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=False, 
-        transform=transforms.Compose([transforms.ToTensor(),
-        transforms.Normalize((0.1307,),(0.3081,))])),
-    batch_size=64,shuffle=True, **kwargs)
-    
 
 
 class Netz(nn.Module):
@@ -49,11 +33,6 @@ class Netz(nn.Module):
 
 
 
-model = Netz()
-# model.cuda()
-
-
-optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.8)
 def train(epoch):
     model.train()
     # model.eval()
@@ -74,6 +53,8 @@ def train(epoch):
 
         # print(loss.item())
         # print(f'Train Epoche: {epoch} [{batch_id*len(data)}/{len(train_data.dataset)} ({100.*batch_id/len(train_data)})] \tLoss:')
+
+        torch.save(model, NET_NAME)
 
 def test():
     model.eval()
@@ -96,7 +77,35 @@ def test():
     print('Accuracy: {:.2f}%'.format(accuracy.item()))
 
 
-for epoch in range(1,2):
-    # train(epoch)
-    test()
 
+if __name__ == "__main__":
+    import os 
+    if os.path.isfile(NET_NAME):
+        model = torch.load(NET_NAME)
+    else:
+        model =Netz()
+        # model.cuda()
+    
+    optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.8)
+    kwargs = {}
+    #if CUDA is in use
+    # kwargs = {'num_workers':1, 'pin_memory':True}
+
+    train_data = torch.utils.data.DataLoader(
+        datasets.MNIST('data', train=True, download=True,
+            transform=transforms.Compose([transforms.ToTensor(),
+            transforms.Normalize((0.1307,),(0.3081,))])),
+        batch_size=64,shuffle=True, **kwargs)
+
+
+    test_data = torch.utils.data.DataLoader(
+        datasets.MNIST('data', train=False, 
+            transform=transforms.Compose([transforms.ToTensor(),
+            transforms.Normalize((0.1307,),(0.3081,))])),
+        batch_size=64,shuffle=True, **kwargs)
+        
+
+
+    for epoch in range(1,2):
+        # train(epoch)
+        test()
