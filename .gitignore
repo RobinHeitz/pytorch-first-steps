@@ -1,3 +1,5 @@
 /.env/
 /mnist/data/
 /mnist/net_mnist.pt
+/cats-and-dogs/data/
+/cats-and-dogs/*.pt
