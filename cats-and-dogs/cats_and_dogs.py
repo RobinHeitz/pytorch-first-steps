@@ -54,6 +54,7 @@ for i in range(len_train_data):
         train_data_list = []
         print('Loaded batch ', len(train_data), 'of ', int(len_train_data / 64))
         print('Percentage Done: ', int(100 * len(train_data) / (len_train_data / 64)), ' %')
+        break
                
         
 
@@ -121,13 +122,13 @@ def train(epoch):
 
         optimizer.zero_grad()
         out = model(data)
-        criterion = F.nll_loss
+        criterion = F.nll_loss( )
         loss = criterion(out, target)
         loss.backward()
         optimizer.step()
-        print('Train Epoche: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-            epoch, batch_id * len(data), len(train_data), 100. * batch_id / len(train_data), loss.item()))
-        batch_id = batch_id + 1
+        # print('Train Epoche: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        #     epoch, batch_id * len(data), len(train_data), 100. * batch_id / len(train_data), loss.item()))
+        # batch_id = batch_id + 1
     torch.save(model, NET_NAME)
 
 
