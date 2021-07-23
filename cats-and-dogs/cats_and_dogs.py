@@ -122,7 +122,7 @@ def train(epoch):
 
         optimizer.zero_grad()
         out = model(data)
-        criterion = F.nll_loss( )
+        criterion = F.binary_cross_entropy
         loss = criterion(out, target)
         loss.backward()
         optimizer.step()
