@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import numpy as np
 import random
 import matplotlib
+import math
 import matplotlib.pyplot as plt
 import gym
 from PIL import Image
@@ -71,7 +72,7 @@ class Netz(nn.Module):
 
 resize = T.Compose([
     T.ToPILImage(),
-    T.Scale(40, interpolation=Image.CUBIC),
+    T.Resize(40, interpolation=Image.CUBIC),
     T.ToTensor()
 ])
 
@@ -86,7 +87,7 @@ def cart_pos():
 
 
 def get_image():
-    screen = env.render(mode='rgb-array').transpose( # brauchen in dimensionen CHW (Channel, height, width)
+    screen = env.render(mode='rgb_array').transpose( # brauchen in dimensionen CHW (Channel, height, width)
         (2,0,1)
     )
     screen = screen[:, 160:320]
@@ -103,6 +104,44 @@ def get_image():
     screen = torch.from_numpy(screen) # got tensor
 
     return resize(screen).unsqueeze(0).type(Tensor)
+
+
+env.reset()
+# plt.figure()
+# plt.imshow(get_image().cpu().squeeze(0).permute(1,2,0).numpy(), interpolation='none')
+# plt.show()
+
+
+model = Netz()
+# model = model.cuda()
+optimizer = optim.RMSprop(model.parameters())
+mem = Memory(16384)
+done = 0
+
+eps_end = 0.02
+eps_start = 0.95
+eps_steps = 250
+
+def get_action(state):
+    #exploration:
+    #Wenn epsilon > treshold, dann wir das model verwendet, anderenfalls eine zufällige action ausgeführt.
+    
+    global done
+    epsilon = random.random()
+    threshold = eps_end + (eps_start - eps_end) * math.exp(-1. * done / eps_steps)
+    done = done + 1
+    if epsilon > threshold:
+        return model(Variable(state, volatile=True).type(Tensor)).data.max(1)[1].view(1,1)
+    else:
+        return LongTensor([random.randint(0,1)])
+
+
+
+
+
+
+
+
 
 
 
